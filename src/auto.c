@@ -33,6 +33,8 @@
  */
 
 #include "main.h"
+#include "auto.h"
+#include "SharedMotorControl.h"
 
 /*
  * Runs the user autonomous code. This function will be started in its own task with the default
@@ -48,5 +50,117 @@
  * The autonomous task may exit, unlike operatorControl() which should never exit. If it does
  * so, the robot will await a switch to another mode or disable/enable cycle.
  */
+
+int jaw_open;
+int jaw_close;
+int intake_jaw_direction;
+int x_input, y_input, angle_input;
+int launch_direction;
+int currentAutoTask; //Will change 0,1,2,etc. based on the task that should be running
+
 void autonomous() {
+
+	currentAutoTask = 1;
+	taskRunLoop(runLoop,1);
+
+}
+void runLoop() {
+	//Make switch variable (states 0,1,or 2) that will change depending on the task the robot
+	//should perform.
+	autoCheckSensors();
+	autoUpdateScreen();
+	autoDelegateTask();
+	autoProcessMotors();
+}
+
+void autoCheckSensors() {
+
+	// read the Jaw Limit Switches
+		jaw_open = digitalRead(PORT_INPUT_JAW_OPEN);
+		jaw_close = digitalRead(PORT_INPUT_JAW_CLOSE);
+
+		/*
+		// if we hit one of the Jaw Limit Switches, we may need to stop the jaw motor....
+		if ((intake_jaw_direction == 1) && (jaw_open == 0))
+			intake_jaw_direction = 0; //resets motion if outer limit switch trips
+		if ((intake_jaw_direction == -1) && (jaw_close == 0))
+			intake_jaw_direction = 0; //resets motion if inner limit switch trips
+		*/
+}
+
+void autoUpdateScreen() {
+
+	//lcdPrint(uart1,1,"x:%d y:%d a:%d",x_input,y_input,angle_input); //driving data
+	lcdPrint(uart1, 1, "Task Num: %d", currentAutoTask); //current task number
+	lcdPrint(uart1, 2, "Direction: %d", intake_jaw_direction);
+
+}
+
+void autoDelegateTask() {
+
+	switch (currentAutoTask) {
+	case 1: autoTask1();
+			break;
+	case 2: autoTask2();
+			break;
+	case 3: autoTask3();
+			break;
+	default: lcdPrint(uart1, 2, "Task Failed"); //fail msg
+			 break;
+	}
+
+}
+
+int autoNormalizeMotorPower(int power)
+{
+	if (power>127)
+		return 127;
+	if (power<-127)
+		return -127;
+	if (power<10 && power>-10)
+		return 0;
+	return power;
+
+}
+
+void autoProcessMotors() {
+
+	int RF_motor_power = autoNormalizeMotorPower(y_input - x_input - angle_input);
+	int RB_motor_power = autoNormalizeMotorPower(y_input + x_input - angle_input);
+	int LF_motor_power = autoNormalizeMotorPower(y_input + x_input + angle_input);
+	int LB_motor_power = autoNormalizeMotorPower(y_input - x_input + angle_input);
+
+	K_setMotor(PORT_MOTOR_FRONT_LEFT,LF_motor_power);
+	K_setMotor(PORT_MOTOR_BACK_LEFT,LB_motor_power);
+	K_setMotor(PORT_MOTOR_FRONT_RIGHT,RF_motor_power);
+	K_setMotor(PORT_MOTOR_BACK_RIGHT,RB_motor_power);
+
+	K_setMotor(PORT_MOTOR_LAUNCH_LEFT, 127*launch_direction);
+	K_setMotor(PORT_MOTOR_LAUNCH_RIGHT, 127*launch_direction);
+	K_setMotor(PORT_MOTOR_INTAKE_JAWS, 127*intake_jaw_direction);
+
+}
+
+void autoTask1() {
+	if(jaw_open == 0) {
+		intake_jaw_direction = 0;
+		currentAutoTask = 2;
+	}
+	else {
+		intake_jaw_direction = 1;
+	}
+}
+
+void autoTask2() {
+	if(jaw_close == 0) {
+		intake_jaw_direction = 0;
+		currentAutoTask = 3;
+	}
+	else {
+		intake_jaw_direction = -1;
+	}
+}
+
+void autoTask3() {
+	intake_jaw_direction = 0;
 }

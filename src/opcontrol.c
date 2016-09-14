@@ -31,8 +31,11 @@
  * Purdue Robotics OS contains FreeRTOS (http://www.freertos.org) whose source code may be
  * obtained from http://sourceforge.net/projects/freertos/files/ or on request.
  */
+// PROJECT: MECANUM DRIVE
 
 #include "main.h"
+#include "opcontrol.h"
+#include "SharedMotorControl.h"
 
 /*
  * Runs the user operator control code. This function will be started in its own task with the
@@ -51,9 +54,123 @@
  *
  * This task should never exit; it should end with some kind of infinite loop, even if empty.
  */
-void operatorControl() {
 
-	while (1) {
-		delay(20);
+int x_input, y_input, angle_input;
+int launch_direction, intake_jaw_direction, intake_lift_direction;
+int jaw_open, jaw_close, jaw_potentiometer;
+
+void operatorControl()
+{
+	while (1)
+	{
+		checkSensors();
+		updateScreen();
+		processMotors();
+		wait(12);
 	}
+}
+
+//-----------------------------------------
+//  NEW METHODS.
+//   note: if you wish to add more methods to this file, you need to put declarations in main.h.
+//-----------------------------------------
+/**
+ * Read what's going on with the joystick(s) and assign that information to variables.
+ */
+void checkSensors()
+{
+	// read the joysticks - they control the motors.
+	x_input = joystickGetAnalog(1,1);
+	y_input = joystickGetAnalog(1,2);
+	angle_input = joystickGetAnalog(1,4);
+
+	// read the right hand shoulder buttons on the joystick - they control the firing
+			//of the launcher.
+	if (joystickGetDigital(1,6,JOY_UP) && !joystickGetDigital(1,5,JOY_UP))
+		launch_direction = 1;
+	else if (!joystickGetDigital(1,6,JOY_UP) && joystickGetDigital(1,5,JOY_UP))
+		launch_direction = -1;
+	else
+		launch_direction = 0;
+
+	// read the left cluster's left/right buttons on joystick - they control jaw in/out
+	if (joystickGetDigital(1,7,JOY_LEFT) && !joystickGetDigital(1,7,JOY_RIGHT))
+		intake_jaw_direction = 1; //open jaw
+	else if (!joystickGetDigital(1,7,JOY_LEFT) && joystickGetDigital(1,7,JOY_RIGHT))
+		intake_jaw_direction = -1; //close jaw
+	else
+		intake_jaw_direction = 0;
+
+	// read the left cluster's up/down buttons on joystick - they control jaw up/down
+		if (joystickGetDigital(1,7,JOY_UP) && !joystickGetDigital(1,7,JOY_DOWN))
+			intake_lift_direction = 1; //open jaw
+		else if (!joystickGetDigital(1,7,JOY_UP) && joystickGetDigital(1,7,JOY_DOWN))
+			intake_lift_direction = -1; //close jaw
+		else
+			intake_lift_direction = 0;
+
+	// read the Jaw Limit Switches
+	jaw_open = digitalRead(PORT_INPUT_JAW_OPEN);
+	jaw_close = digitalRead(PORT_INPUT_JAW_CLOSE);
+	jaw_potentiometer = analogRead(PORT_INPUT_POTENTIOMETER);
+
+	// if we hit one of the Jaw Limit Switches, we may need to stop the jaw motor....
+	if ((intake_jaw_direction == 1) && (jaw_open == 0))
+		intake_jaw_direction = 0; //resets motion if outer limit switch trips
+	if ((intake_jaw_direction == -1) && (jaw_close == 0))
+		intake_jaw_direction = 0; //resets motion if inner limit switch trips
+}
+
+/**
+ * put relevant information up on the LCD screen for debugging, based on the variables we
+ * are using.
+ * Note: to use the LCD screen, in the init.c file, you have to add two lines to initializeIO():
+ *   lcdInit(uart1);
+ *   lcdClear(uart1);
+ */
+void updateScreen()
+{
+	//lcdPrint(uart1,1,"x:%d y:%d a:%d",x_input,y_input,angle_input); //driving data
+	lcdPrint(uart1, 1, "Direction: %d", intake_jaw_direction); //intake data
+	lcdPrint(uart1, 2, "%d", jaw_potentiometer); //potentiometer data
+
+
+}
+
+/**
+ * Here we take the information in the variables and we apply it to the actual motor commands.
+ * Motor names and their orientations are set up in SharedMotorControl.h.
+ */
+void processMotors()
+{
+	int RF_motor_power = normalizeMotorPower(y_input - x_input - angle_input);
+	int RB_motor_power = normalizeMotorPower(y_input + x_input - angle_input);
+	int LF_motor_power = normalizeMotorPower(y_input + x_input + angle_input);
+	int LB_motor_power = normalizeMotorPower(y_input - x_input + angle_input);
+
+	K_setMotor(PORT_MOTOR_FRONT_LEFT,LF_motor_power);
+	K_setMotor(PORT_MOTOR_BACK_LEFT,LB_motor_power);
+	K_setMotor(PORT_MOTOR_FRONT_RIGHT,RF_motor_power);
+	K_setMotor(PORT_MOTOR_BACK_RIGHT,RB_motor_power);
+
+	K_setMotor(PORT_MOTOR_LAUNCH_LEFT, 127*launch_direction);
+	K_setMotor(PORT_MOTOR_LAUNCH_RIGHT, 127*launch_direction);
+	K_setMotor(PORT_MOTOR_INTAKE_JAWS, 127*intake_jaw_direction);
+
+	K_setMotor(PORT_MOTOR_INTAKE_LIFT_LEFT, 127*intake_lift_direction);
+	K_setMotor(PORT_MOTOR_INTAKE_LIFT_RIGHT, 127*intake_lift_direction);
+
+
+}
+
+int normalizeMotorPower(int power)
+{
+	if (power>127)
+		return 127;
+	if (power<-127)
+		return -127;
+	if (power<10 && power>-10)
+		return 0;
+	return power;
+
 }
