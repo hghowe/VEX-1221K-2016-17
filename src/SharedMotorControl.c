@@ -19,7 +19,7 @@ const int DIRECTION_MODIFIERS[] = {PORT_ORIENTATION_NORMAL,  //0 - not actually 
 									PORT_ORIENTATION_REVERSED, //7
 									PORT_ORIENTATION_NORMAL, //8
 									PORT_ORIENTATION_NORMAL, //9
-									PORT_ORIENTATION_REVERSED}; //10
+									PORT_ORIENTATION_NORMAL}; //10
 
 /**
  *  turns on the given motor at the current power level - just like motorSet, but incorporates

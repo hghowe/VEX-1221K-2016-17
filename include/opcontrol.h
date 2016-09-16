@@ -16,5 +16,7 @@ void checkSensors();
 void updateScreen();
 void processMotors();
 int normalizeMotorPower(int power);
+int jaw_potentiometer_max = 3400;
+int jaw_potentiometer_min = 490;
 
 #endif /* OPCONTROL_H_ */

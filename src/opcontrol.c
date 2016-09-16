@@ -103,9 +103,9 @@ void checkSensors()
 
 	// read the left cluster's up/down buttons on joystick - they control jaw up/down
 		if (joystickGetDigital(1,7,JOY_UP) && !joystickGetDigital(1,7,JOY_DOWN))
-			intake_lift_direction = 1; //open jaw
+			intake_lift_direction = 1; //jaw up
 		else if (!joystickGetDigital(1,7,JOY_UP) && joystickGetDigital(1,7,JOY_DOWN))
-			intake_lift_direction = -1; //close jaw
+			intake_lift_direction = -1; //jaw down
 		else
 			intake_lift_direction = 0;
 
@@ -119,6 +119,14 @@ void checkSensors()
 		intake_jaw_direction = 0; //resets motion if outer limit switch trips
 	if ((intake_jaw_direction == -1) && (jaw_close == 0))
 		intake_jaw_direction = 0; //resets motion if inner limit switch trips
+
+	//set limits for jaw potentiometer
+	if ((intake_lift_direction == 1) && (jaw_potentiometer <= jaw_potentiometer_min)) {
+		intake_lift_direction = 0;
+	}
+	if ((intake_lift_direction == -1) && (jaw_potentiometer >= jaw_potentiometer_max)) {
+		intake_lift_direction = 0;
+	}
 }
 
 /**
