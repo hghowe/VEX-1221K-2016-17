@@ -121,10 +121,10 @@ void checkSensors()
 		intake_jaw_direction = 0; //resets motion if inner limit switch trips
 
 	//set limits for jaw potentiometer
-	if ((intake_lift_direction == 1) && (jaw_potentiometer <= jaw_potentiometer_min)) {
+	if ((intake_lift_direction == -1) && (jaw_potentiometer <= jaw_potentiometer_min)) {
 		intake_lift_direction = 0;
 	}
-	if ((intake_lift_direction == -1) && (jaw_potentiometer >= jaw_potentiometer_max)) {
+	if ((intake_lift_direction == 1) && (jaw_potentiometer >= jaw_potentiometer_max)) {
 		intake_lift_direction = 0;
 	}
 }
