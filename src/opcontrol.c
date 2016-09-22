@@ -94,9 +94,9 @@ void checkSensors()
 		launch_direction = 0;
 
 	// read the left cluster's left/right buttons on joystick - they control jaw in/out
-	if (joystickGetDigital(1,7,JOY_LEFT) && !joystickGetDigital(1,7,JOY_RIGHT))
+	if (joystickGetDigital(1,7,JOY_RIGHT) && !joystickGetDigital(1,7,JOY_LEFT))
 		intake_jaw_direction = 1; //open jaw
-	else if (!joystickGetDigital(1,7,JOY_LEFT) && joystickGetDigital(1,7,JOY_RIGHT))
+	else if (!joystickGetDigital(1,7,JOY_RIGHT) && joystickGetDigital(1,7,JOY_LEFT))
 		intake_jaw_direction = -1; //close jaw
 	else
 		intake_jaw_direction = 0;
