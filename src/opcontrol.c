@@ -140,9 +140,10 @@ void updateScreen()
 {
 	//lcdPrint(uart1,1,"x:%d y:%d a:%d",x_input,y_input,angle_input); //driving data
 	lcdPrint(uart1, 1, "Direction: %d", intake_jaw_direction); //intake data
-	lcdPrint(uart1, 2, "Jaw Pot: %d", jaw_potentiometer); //potentiometer data
-
-
+	//lcdPrint(uart1, 2, "Jaw Pot: %d", jaw_potentiometer); //potentiometer data
+	int imeValue = 0;
+	imeGet(0, &imeValue);
+	lcdPrint(uart1, 2, "IME: %d", imeValue);
 }
 
 /**
