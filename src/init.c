@@ -44,8 +44,8 @@
  */
 void initializeIO() {
 	// Activate the LCD screen.
-	lcdInit(uart1);
-	lcdClear(uart1);
+//	lcdInit(uart1);
+//	lcdClear(uart1);
 }
 
 /*
@@ -62,5 +62,7 @@ void initializeIO() {
  * can be implemented in this task if desired.
  */
 void initialize() {
+	lcdInit(uart1);
+	lcdClear(uart1);
 	imeInitializeAll();
 }

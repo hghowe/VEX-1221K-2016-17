@@ -58,6 +58,8 @@
 int x_input, y_input, angle_input;
 int launch_direction, intake_jaw_direction, intake_lift_direction;
 int jaw_open, jaw_close, jaw_potentiometer;
+int encoder0;
+bool encoderReading0;
 
 void operatorControl()
 {
@@ -127,6 +129,10 @@ void checkSensors()
 	if ((intake_lift_direction == 1) && (jaw_potentiometer >= jaw_potentiometer_max)) {
 		intake_lift_direction = 0;
 	}
+
+	// Check encoders
+	encoderReading0 = imeGet(0, &encoder0);
+
 }
 
 /**
@@ -138,12 +144,17 @@ void checkSensors()
  */
 void updateScreen()
 {
-	//lcdPrint(uart1,1,"x:%d y:%d a:%d",x_input,y_input,angle_input); //driving data
-	lcdPrint(uart1, 1, "Direction: %d", intake_jaw_direction); //intake data
-	//lcdPrint(uart1, 2, "Jaw Pot: %d", jaw_potentiometer); //potentiometer data
+
+    //lcdPrint(uart1,1,"x:%d y:%d a:%d",x_input,y_input,angle_input); //driving data
+//    lcdPrint(uart1, 1, "Direction: %d", intake_jaw_direction); //intake data
+//	lcdPrint(uart1, 2, "Jaw Pot: %d", jaw_potentiometer); //potentiometer data
+	/*
 	int imeValue = 0;
-	imeGet(0, &imeValue);
-	lcdPrint(uart1, 2, "IME: %d", imeValue);
+	bool result = imeGet(0, &imeValue);
+	lcdPrint(uart1, 2, "IME= %d", imeValue);
+	lcdPrint(uart1, 1, "got result: %d", result);
+	*/
+	lcdPrint(uart1,1,"Encoder: %d",encoder0);
 }
 
 /**
