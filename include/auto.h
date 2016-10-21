@@ -17,8 +17,10 @@ void autoUpdateScreen();
 void autoDelegateTask();
 int autoNormalizeMotorPower();
 void autoProcessMotors();
+/*
 void autoTask1();
 void autoTask2();
 void autoTask3();
+*/
 
 #endif /* AUTO_H_ */

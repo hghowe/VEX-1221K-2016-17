@@ -23,6 +23,21 @@
 #define PORT_ORIENTATION_NORMAL 1
 #define PORT_ORIENTATION_REVERSED -1
 
+#define PORT_ENCODER_FL 3
+#define PORT_ENCODER_FR 2
+#define PORT_ENCODER_BL 1
+#define PORT_ENCODER_BR 0
+
+bool encoderReadingFL;
+bool encoderReadingFR;
+bool encoderReadingBL;
+bool encoderReadingBR;
+
+int encoderFL;
+int encoderFR;
+int encoderBL;
+int encoderBR;
+
 /**
  *  turns on the given motor at the current power level - just like motorSet, but incorporates
  *  MOTOR_DIRECTION so we can assume positive is always forward.

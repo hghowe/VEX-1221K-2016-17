@@ -64,9 +64,7 @@ void autonomous() {
 	taskRunLoop(runLoop,1);
 
 }
-void runLoop() {
-	//Make switch variable (states 0,1,or 2) that will change depending on the task the robot
-	//should perform.
+void runLoop(int state) {
 	autoCheckSensors();
 	autoUpdateScreen();
 	autoDelegateTask();
@@ -91,19 +89,18 @@ void autoCheckSensors() {
 void autoUpdateScreen() {
 
 	//lcdPrint(uart1,1,"x:%d y:%d a:%d",x_input,y_input,angle_input); //driving data
-	lcdPrint(uart1, 1, "Task Num: %d", currentAutoTask); //current task number
-	lcdPrint(uart1, 2, "Direction: %d", intake_jaw_direction);
-
+	//lcdPrint(uart1, 1, "Task Num: %d", currentAutoTask); //current task number
+	//lcdPrint(uart1, 2, "Direction: %d", intake_jaw_direction);
 }
 
 void autoDelegateTask() {
 
 	switch (currentAutoTask) {
-	case 1: autoTask1();
+	case 1: //autoTask1();
 			break;
-	case 2: autoTask2();
+	case 2: //autoTask2();
 			break;
-	case 3: autoTask3();
+	case 3: //autoTask3();
 			break;
 	default: lcdPrint(uart1, 2, "Task Failed"); //fail msg
 			 break;
@@ -141,8 +138,28 @@ void autoProcessMotors() {
 
 }
 
+void autoMoveFwd(int duration) {
+	// x_input and y_input are being set directly here (since the autoProcessMotors code came
+	// from opcontrol.c) instead of taking their values from the joystick.
+
+	x_input = 0;
+	y_input = 110;
+
+	//figure out how to wait for "duration" (the variable) seconds WITHOUT freezing the runLoop()
+}
+
+void autoMoveBack(int duration) {
+	// x_input and y_input are being set directly here (since the autoProcessMotors code came
+	// from opcontrol.c) instead of taking their values from the joystick.
+
+	x_input = 0;
+	y_input = -110;
+
+	//figure out how to wait for "duration" (the variable) seconds WITHOUT freezing the runLoop()
+}
+/*
 void autoTask1() {
-	if(jaw_open == 0) {
+	if(jaw_open == 0) { //jaw_open == 0 means switch has been triggered
 		intake_jaw_direction = 0;
 		currentAutoTask = 2;
 	}
@@ -164,3 +181,4 @@ void autoTask2() {
 void autoTask3() {
 	intake_jaw_direction = 0;
 }
+*/
