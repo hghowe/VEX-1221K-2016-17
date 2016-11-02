@@ -58,8 +58,16 @@ int x_input, y_input, angle_input;
 int launch_direction;
 int currentAutoTask; //Will change 0,1,2,etc. based on the task that should be running
 
-void autonomous() {
+float lastPosition = 0;
+float anglePosition = 0;
 
+float FLScale = 3500;
+float FRScale = -3500;
+float BLScale = -3500;
+float BRScale = 3500;
+
+void autonomous() {
+	lastPosition = LPos();
 	currentAutoTask = 1;
 	taskRunLoop(runLoop,1);
 
@@ -69,6 +77,10 @@ void runLoop(int state) {
 	autoUpdateScreen();
 	autoDelegateTask();
 	autoProcessMotors();
+}
+
+float LPos() {
+	return (encoderFL/FLScale + encoderFR/FRScale + encoderBL/BLScale + encoderBR/BRScale)/4;
 }
 
 void autoCheckSensors() {
@@ -138,7 +150,7 @@ void autoProcessMotors() {
 
 }
 
-void autoMoveFwd(int duration) {
+void autoMoveFwd() {
 	// x_input and y_input are being set directly here (since the autoProcessMotors code came
 	// from opcontrol.c) instead of taking their values from the joystick.
 
@@ -148,7 +160,7 @@ void autoMoveFwd(int duration) {
 	//figure out how to wait for "duration" (the variable) seconds WITHOUT freezing the runLoop()
 }
 
-void autoMoveBack(int duration) {
+void autoMoveBack() {
 	// x_input and y_input are being set directly here (since the autoProcessMotors code came
 	// from opcontrol.c) instead of taking their values from the joystick.
 
@@ -157,28 +169,29 @@ void autoMoveBack(int duration) {
 
 	//figure out how to wait for "duration" (the variable) seconds WITHOUT freezing the runLoop()
 }
-/*
+
+void autoStop() {
+	// x_input and y_input are being set directly here (since the autoProcessMotors code came
+	// from opcontrol.c) instead of taking their values from the joystick.
+
+	K_setMotor(PORT_MOTOR_FRONT_LEFT,0);
+	K_setMotor(PORT_MOTOR_FRONT_RIGHT,0);
+	K_setMotor(PORT_MOTOR_BACK_LEFT,0);
+	K_setMotor(PORT_MOTOR_BACK_RIGHT,0);
+
+	//figure out how to wait for "duration" (the variable) seconds WITHOUT freezing the runLoop()
+}
+
 void autoTask1() {
-	if(jaw_open == 0) { //jaw_open == 0 means switch has been triggered
-		intake_jaw_direction = 0;
-		currentAutoTask = 2;
-	}
-	else {
-		intake_jaw_direction = 1;
-	}
+	autoMoveFwd();
+
+	if ((LPos() - lastPosition) > 4000) {currentAutoTask++;}
 }
 
 void autoTask2() {
-	if(jaw_close == 0) {
-		intake_jaw_direction = 0;
-		currentAutoTask = 3;
-	}
-	else {
-		intake_jaw_direction = -1;
-	}
+	autoStop();
 }
 
 void autoTask3() {
-	intake_jaw_direction = 0;
+
 }
-*/

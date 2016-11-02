@@ -17,6 +17,8 @@ void autoUpdateScreen();
 void autoDelegateTask();
 int autoNormalizeMotorPower();
 void autoProcessMotors();
+
+float LPos();
 /*
 void autoTask1();
 void autoTask2();
