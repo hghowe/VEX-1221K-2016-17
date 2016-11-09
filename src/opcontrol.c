@@ -86,13 +86,14 @@ void checkSensors()
 
 	// read the right hand shoulder buttons on the joystick - they control the firing
 			//of the launcher.
-	if (joystickGetDigital(1,6,JOY_UP) && !joystickGetDigital(1,5,JOY_UP))
-		launch_direction = 1;
-	else if (!joystickGetDigital(1,6,JOY_UP) && joystickGetDigital(1,5,JOY_UP))
-		launch_direction = -1;
+	if (joystickGetDigital(1,6,JOY_UP) && !joystickGetDigital(1,6,JOY_DOWN)) //if 6U is pressed
+		intake_lift_direction = 1; //intake up
+	else if (!joystickGetDigital(1,6,JOY_UP) && joystickGetDigital(1,6,JOY_DOWN)) // if 6D is pressed
+		intake_lift_direction = -1; //intake down
 	else
-		launch_direction = 0;
+		intake_lift_direction = 0;
 
+/*
 	// read the left cluster's left/right buttons on joystick - they control jaw in/out
 	if (joystickGetDigital(1,7,JOY_RIGHT) && !joystickGetDigital(1,7,JOY_LEFT))
 		intake_jaw_direction = 1; //open jaw
@@ -100,15 +101,15 @@ void checkSensors()
 		intake_jaw_direction = -1; //close jaw
 	else
 		intake_jaw_direction = 0;
-
+*/
 	// read the left cluster's up/down buttons on joystick - they control jaw up/down
 		if (joystickGetDigital(1,7,JOY_UP) && !joystickGetDigital(1,7,JOY_DOWN))
-			intake_lift_direction = 1; //jaw up
+			launch_direction = 1;
 		else if (!joystickGetDigital(1,7,JOY_UP) && joystickGetDigital(1,7,JOY_DOWN))
-			intake_lift_direction = -1; //jaw down
+			launch_direction = -1;
 		else
-			intake_lift_direction = 0;
-
+			launch_direction = 0;
+/*
 	// read the Jaw Limit Switches
 	jaw_open = digitalRead(PORT_INPUT_JAW_OPEN);
 	jaw_close = digitalRead(PORT_INPUT_JAW_CLOSE);
@@ -127,6 +128,7 @@ void checkSensors()
 	if ((intake_lift_direction == 1) && (jaw_potentiometer >= jaw_potentiometer_max)) {
 		intake_lift_direction = 0;
 	}
+*/
 	encoderReadingFL = imeGet(PORT_ENCODER_FL, &encoderFL);
 	encoderReadingFR = imeGet(PORT_ENCODER_FR, &encoderFR);
 	encoderReadingBL = imeGet(PORT_ENCODER_BL, &encoderBL);
@@ -166,12 +168,12 @@ void processMotors()
 	K_setMotor(PORT_MOTOR_FRONT_RIGHT,RF_motor_power);
 	K_setMotor(PORT_MOTOR_BACK_RIGHT,RB_motor_power);
 
-	K_setMotor(PORT_MOTOR_LAUNCH_LEFT, 127*launch_direction);
-	K_setMotor(PORT_MOTOR_LAUNCH_RIGHT, 127*launch_direction);
-	K_setMotor(PORT_MOTOR_INTAKE_JAWS, 127*intake_jaw_direction);
+	K_setMotor(PORT_MOTOR_FLIPPER_LEFT, 127*launch_direction);
+	K_setMotor(PORT_MOTOR_FLIPPER_RIGHT, 127*launch_direction);
+	//K_setMotor(PORT_MOTOR_INTAKE_JAWS, 127*intake_jaw_direction);
 
-	K_setMotor(PORT_MOTOR_INTAKE_LIFT_LEFT, 127*intake_lift_direction);
-	K_setMotor(PORT_MOTOR_INTAKE_LIFT_RIGHT, 127*intake_lift_direction);
+	K_setMotor(PORT_MOTOR_INTAKE_LEFT, 127*intake_lift_direction);
+	K_setMotor(PORT_MOTOR_INTAKE_RIGHT, 127*intake_lift_direction);
 
 
 }

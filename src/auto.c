@@ -54,17 +54,25 @@
 int jaw_open;
 int jaw_close;
 int intake_jaw_direction;
-int x_input, y_input, angle_input;
+int x_input=0, y_input=0, angle_input=0;
 int launch_direction;
-int currentAutoTask; //Will change 0,1,2,etc. based on the task that should be running
+//the overall template here is a state machine on currentAutoTask
+//individual autoTask() functions will set currentAutoTask, throwing it to the next task
+
+int currentAutoTask=1; //Will change 0,1,2,etc. based on the task that should be running
 
 float lastPosition = 0;
 float anglePosition = 0;
 
+//These scale factors help adjust our different wheels.  This may
 float FLScale = 3500;
 float FRScale = -3500;
 float BLScale = -3500;
 float BRScale = 3500;
+float FLAScale = 3500;
+float FRAScale = 3500;
+float BLAScale = -3500;//signs are differnt for turning than for distance.
+float BRAScale = -3500;
 
 void autonomous() {
 	lastPosition = LPos();
@@ -83,36 +91,52 @@ float LPos() {
 	return (encoderFL/FLScale + encoderFR/FRScale + encoderBL/BLScale + encoderBR/BRScale)/4;
 }
 
+
+float APos()
+{
+	return (encoderFL/FLAScale + encoderFR/FRAScale + encoderBL/BLAScale + encoderBR/BRAScale)/4;
+
+}
 void autoCheckSensors() {
+
+	bool encoderReadingFL=false;
+	bool encoderReadingFR=false;
+	bool encoderReadingBL=false;
+	bool encoderReadingBR=false;
 
 	// read the Jaw Limit Switches
 		jaw_open = digitalRead(PORT_INPUT_JAW_OPEN);
 		jaw_close = digitalRead(PORT_INPUT_JAW_CLOSE);
 
-		/*
-		// if we hit one of the Jaw Limit Switches, we may need to stop the jaw motor....
-		if ((intake_jaw_direction == 1) && (jaw_open == 0))
-			intake_jaw_direction = 0; //resets motion if outer limit switch trips
-		if ((intake_jaw_direction == -1) && (jaw_close == 0))
-			intake_jaw_direction = 0; //resets motion if inner limit switch trips
-		*/
+		encoderReadingFL = imeGet(PORT_ENCODER_FL, &encoderFL);
+		encoderReadingFR = imeGet(PORT_ENCODER_FR, &encoderFR);
+		encoderReadingBL = imeGet(PORT_ENCODER_BL, &encoderBL);
+		encoderReadingBR = imeGet(PORT_ENCODER_BR, &encoderBR);
+
+		if (!encoderReadingFL || !encoderReadingFR || !encoderReadingBL || !encoderReadingBR)
+		{
+			currentAutoTask=0;//All stop encoder fail
+			lcdPrint(uart1,1,"All Stop Encoder Fail");
+
+		}
 }
 
 void autoUpdateScreen() {
 
-	//lcdPrint(uart1,1,"x:%d y:%d a:%d",x_input,y_input,angle_input); //driving data
-	//lcdPrint(uart1, 1, "Task Num: %d", currentAutoTask); //current task number
-	//lcdPrint(uart1, 2, "Direction: %d", intake_jaw_direction);
+	lcdPrint(uart1,1,"x:%d y:%d a:%d",x_input,y_input,angle_input); //driving data
+	lcdPrint(uart1, 1, "Task Num: %d", currentAutoTask); //current task number
+	lcdPrint(uart1, 2, "Direction: %d", intake_jaw_direction);
 }
 
 void autoDelegateTask() {
-
+//the individual tasks will handle incrementing the currentAutotask variable
 	switch (currentAutoTask) {
-	case 1: //autoTask1();
+	case 1:
+			autoTask1();//move the robot forward
 			break;
-	case 2: //autoTask2();
+	case 2: autoTask2();//stop the robot
 			break;
-	case 3: //autoTask3();
+	case 3: //autoTask3();//turn right
 			break;
 	default: lcdPrint(uart1, 2, "Task Failed"); //fail msg
 			 break;
@@ -144,9 +168,9 @@ void autoProcessMotors() {
 	K_setMotor(PORT_MOTOR_FRONT_RIGHT,RF_motor_power);
 	K_setMotor(PORT_MOTOR_BACK_RIGHT,RB_motor_power);
 
-	K_setMotor(PORT_MOTOR_LAUNCH_LEFT, 127*launch_direction);
-	K_setMotor(PORT_MOTOR_LAUNCH_RIGHT, 127*launch_direction);
-	K_setMotor(PORT_MOTOR_INTAKE_JAWS, 127*intake_jaw_direction);
+	K_setMotor(PORT_MOTOR_INTAKE_LEFT, 127*launch_direction);
+	K_setMotor(PORT_MOTOR_INTAKE_RIGHT, 127*launch_direction);
+	//K_setMotor(PORT_MOTOR_INTAKE_JAWS, 127*intake_jaw_direction);
 
 }
 
@@ -157,7 +181,7 @@ void autoMoveFwd() {
 	x_input = 0;
 	y_input = 110;
 
-	//figure out how to wait for "duration" (the variable) seconds WITHOUT freezing the runLoop()
+
 }
 
 void autoMoveBack() {
@@ -167,7 +191,7 @@ void autoMoveBack() {
 	x_input = 0;
 	y_input = -110;
 
-	//figure out how to wait for "duration" (the variable) seconds WITHOUT freezing the runLoop()
+
 }
 
 void autoStop() {
@@ -179,17 +203,24 @@ void autoStop() {
 	K_setMotor(PORT_MOTOR_BACK_LEFT,0);
 	K_setMotor(PORT_MOTOR_BACK_RIGHT,0);
 
-	//figure out how to wait for "duration" (the variable) seconds WITHOUT freezing the runLoop()
+
 }
 
+
+//autoTask functions, must set controls and wait until a given event.
+//when the event is triggered, these must increment currentAutotask to move to the next event
+//Do not put any large loops in autotasks, these should just set controls and then drop back to
+//the autoloop
 void autoTask1() {
 	autoMoveFwd();
 
-	if ((LPos() - lastPosition) > 4000) {currentAutoTask++;}
+	if ((LPos() - lastPosition) > 2000) {currentAutoTask++;}
+	lcdPrint(uart1,1,"%3.2f", (LPos()));
 }
 
 void autoTask2() {
 	autoStop();
+	lcdPrint(uart1,1,"autoStop");
 }
 
 void autoTask3() {
