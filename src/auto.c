@@ -51,8 +51,8 @@
  * so, the robot will await a switch to another mode or disable/enable cycle.
  */
 
-int jaw_open;
-int jaw_close;
+//int jaw_open;
+//int jaw_close;
 int intake_jaw_direction;
 int x_input=0, y_input=0, angle_input=0;
 int launch_direction;
@@ -105,8 +105,8 @@ void autoCheckSensors() {
 	bool encoderReadingBR=false;
 
 	// read the Jaw Limit Switches
-		jaw_open = digitalRead(PORT_INPUT_JAW_OPEN);
-		jaw_close = digitalRead(PORT_INPUT_JAW_CLOSE);
+		//jaw_open = digitalRead(PORT_INPUT_JAW_OPEN);
+		//jaw_close = digitalRead(PORT_INPUT_JAW_CLOSE);
 
 		encoderReadingFL = imeGet(PORT_ENCODER_FL, &encoderFL);
 		encoderReadingFR = imeGet(PORT_ENCODER_FR, &encoderFR);
