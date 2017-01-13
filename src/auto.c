@@ -150,11 +150,13 @@ void autoDelegateTask() {
 	*/
 	case 1:
 		//autoTurnToHeading(90);
-		//autoTask1();
+		autoTask1();
 		break;
 	case 2:
+		autoTask2();
 		break;
 	case 3:
+		autoTask3();
 		break;
 	default:
 		lcdPrint(uart1, 2, "Task Failed"); //fail msg
@@ -201,7 +203,7 @@ void autoMoveFwd() {
 	K_setMotor(PORT_MOTOR_FRONT_LEFT,127);
 	K_setMotor(PORT_MOTOR_FRONT_RIGHT,127);
 	K_setMotor(PORT_MOTOR_BACK_LEFT,127);
-	K_setMotor(PORT_MOTOR_BACK_LEFT,127);
+	K_setMotor(PORT_MOTOR_BACK_RIGHT,127);
 
 
 }
@@ -293,8 +295,23 @@ void autoStop() {
 //the autoloop
 void autoTask1() {
 	autoMoveFwd();
-	delay(1010);
+	delay(1600);
+	autoStop();
+	delay(1000);
 
+	K_setMotor(PORT_MOTOR_FLIPPER_LEFT, 127);
+	K_setMotor(PORT_MOTOR_FLIPPER_RIGHT, 127);
+	K_setMotor(PORT_MOTOR_INTAKE_LEFT, 127);
+	K_setMotor(PORT_MOTOR_INTAKE_RIGHT, 127);
+	delay(1000);
+
+	K_setMotor(PORT_MOTOR_FLIPPER_LEFT, 0);
+	K_setMotor(PORT_MOTOR_FLIPPER_RIGHT, 0);
+	K_setMotor(PORT_MOTOR_INTAKE_LEFT, 0);
+	K_setMotor(PORT_MOTOR_INTAKE_RIGHT, 0);
+	delay(8000);
+
+	//currentAutoTask += 1;
 
 //	intake_lift_direction = 1;
 //	delay(250);
@@ -310,7 +327,6 @@ void autoTask1() {
 
 void autoTask2() {
 	autoStop();
-	lcdPrint(uart1,1,"autoStop");
 }
 
 void autoTask3() {

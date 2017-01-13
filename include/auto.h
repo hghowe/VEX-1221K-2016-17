@@ -30,10 +30,4 @@ void autoTurnToHeading(float desiredHeading);
 float convertRawGyroValToDegrees();
 float findDesiredChangeInDegrees(float desiredHeading);
 
-/*
-void autoTask1();
-void autoTask2();
-void autoTask3();
-*/
-
 #endif /* AUTO_H_ */
