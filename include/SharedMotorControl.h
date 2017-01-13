@@ -44,6 +44,8 @@ int encoderFR;
 int encoderBL;
 int encoderBR;
 
+int gyroVal;
+
 /**
  *  turns on the given motor at the current power level - just like motorSet, but incorporates
  *  MOTOR_DIRECTION so we can assume positive is always forward.

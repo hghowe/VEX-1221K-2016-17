@@ -50,6 +50,8 @@
 extern "C" {
 #endif
 
+Gyro MyGyro;
+
 // A function prototype looks exactly like its declaration, but with a semicolon instead of
 // actual code. If a function does not match a prototype, compile errors will occur.
 
@@ -69,6 +71,8 @@ extern "C" {
  * The autonomous task may exit, unlike operatorControl() which should never exit. If it does
  * so, the robot will await a switch to another mode or disable/enable cycle.
  */
+
+
 void autonomous();
 /**
  * Runs pre-initialization code. This function will be started in kernel mode one time while the

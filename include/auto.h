@@ -18,10 +18,18 @@ void autoDelegateTask();
 int autoNormalizeMotorPower();
 void autoProcessMotors();
 
-float LPos();
+//float LPos();
 
 void autoTask1();
 void autoTask2();
+void autoTask3();
+
+void autoTurnLeft();
+
+void autoTurnToHeading(float desiredHeading);
+float convertRawGyroValToDegrees();
+float findDesiredChangeInDegrees(float desiredHeading);
+
 /*
 void autoTask1();
 void autoTask2();

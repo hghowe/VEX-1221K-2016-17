@@ -84,14 +84,24 @@ void checkSensors()
 	y_input = joystickGetAnalog(1,2);
 	angle_input = joystickGetAnalog(1,4);
 
-	// read the right hand shoulder buttons on the joystick - they control the firing
-			//of the launcher.
-	if (joystickGetDigital(1,6,JOY_UP) && !joystickGetDigital(1,6,JOY_DOWN)) //if 6U is pressed
-		intake_lift_direction = 1; //intake up
-	else if (!joystickGetDigital(1,6,JOY_UP) && joystickGetDigital(1,6,JOY_DOWN)) // if 6D is pressed
-		intake_lift_direction = -1; //intake down
+	// read gyro value
+	gyroVal = gyroGet(MyGyro);
+
+	// read the right hand shoulder buttons on the joystick - INTAKE UP AND DOWN
+	if (joystickGetDigital(1,5,JOY_UP) && !joystickGetDigital(1,5,JOY_DOWN)) //if 6U is pressed
+		intake_lift_direction = 1; //INTAKE UP
+	else if (!joystickGetDigital(1,5,JOY_UP) && joystickGetDigital(1,5,JOY_DOWN)) // if 6D is pressed
+		intake_lift_direction = -1; //INTAKE DOWN
 	else
 		intake_lift_direction = 0;
+
+	// read the left hand shoulder buttons on the joystick - FLIPPER FORWARD AND BACKWARD
+		if (joystickGetDigital(1,6,JOY_UP) && !joystickGetDigital(1,6,JOY_DOWN)) //if 5U is pressed
+			launch_direction = -1; //FLIPPER Back
+		else if (!joystickGetDigital(1,6,JOY_UP) && joystickGetDigital(1,6,JOY_DOWN)) // if 5D is pressed
+			launch_direction = 1; //FLIPPER forward
+		else
+			launch_direction = 0;
 
 /*
 	// read the left cluster's left/right buttons on joystick - they control jaw in/out
@@ -104,11 +114,11 @@ void checkSensors()
 */
 	// read the left cluster's up/down buttons on joystick - they control jaw up/down
 		if (joystickGetDigital(1,7,JOY_UP) && !joystickGetDigital(1,7,JOY_DOWN))
-			launch_direction = 1;
+			intake_lift_direction = 1;
 		else if (!joystickGetDigital(1,7,JOY_UP) && joystickGetDigital(1,7,JOY_DOWN))
-			launch_direction = -1;
+			intake_lift_direction = -1;
 		else
-			launch_direction = 0;
+			intake_lift_direction = 0;
 /*
 	// read the Jaw Limit Switches
 	jaw_open = digitalRead(PORT_INPUT_JAW_OPEN);
@@ -129,6 +139,8 @@ void checkSensors()
 		intake_lift_direction = 0;
 	}
 */
+
+
 	encoderReadingFL = imeGet(PORT_ENCODER_FL, &encoderFL);
 	encoderReadingFR = imeGet(PORT_ENCODER_FR, &encoderFR);
 	encoderReadingBL = imeGet(PORT_ENCODER_BL, &encoderBL);

@@ -56,6 +56,7 @@ int jaw_close;
 int intake_jaw_direction;
 int x_input=0, y_input=0, angle_input=0;
 int launch_direction;
+
 //the overall template here is a state machine on currentAutoTask
 //individual autoTask() functions will set currentAutoTask, throwing it to the next task
 
@@ -75,11 +76,12 @@ float BLAScale = -3500;//signs are differnt for turning than for distance.
 float BRAScale = -3500;
 
 void autonomous() {
-	lastPosition = LPos();
+	//lastPosition = LPos();
 	currentAutoTask = 1;
 	taskRunLoop(runLoop,1);
 
 }
+
 void runLoop(int state) {
 	autoCheckSensors();
 	autoUpdateScreen();
@@ -87,22 +89,25 @@ void runLoop(int state) {
 	autoProcessMotors();
 }
 
-float LPos() {
-	return (encoderFL/FLScale + encoderFR/FRScale + encoderBL/BLScale + encoderBR/BRScale)/4;
-}
-
-
-float APos()
-{
-	return (encoderFL/FLAScale + encoderFR/FRAScale + encoderBL/BLAScale + encoderBR/BRAScale)/4;
-
-}
+//float LPos() {
+//	return (encoderFL/FLScale + encoderFR/FRScale + encoderBL/BLScale + encoderBR/BRScale)/4;
+//}
+//
+//
+//float APos()
+//{
+//	return (encoderFL/FLAScale + encoderFR/FRAScale + encoderBL/BLAScale + encoderBR/BRAScale)/4;
+//
+//}
 void autoCheckSensors() {
 
 	bool encoderReadingFL=false;
 	bool encoderReadingFR=false;
 	bool encoderReadingBL=false;
 	bool encoderReadingBR=false;
+
+	// read gyro value
+	gyroVal = gyroGet(MyGyro);
 
 	// read the Jaw Limit Switches
 		jaw_open = digitalRead(PORT_INPUT_JAW_OPEN);
@@ -131,8 +136,9 @@ void autoUpdateScreen() {
 void autoDelegateTask() {
 //the individual tasks will handle incrementing the currentAutotask variable
 	switch (currentAutoTask) {
+	/*
 	case 1:
-			autoTask1();//move the robot forward
+			autoTask1(); //move the robot forward
 			break;
 	case 2: autoTask2();//stop the robot
 			break;
@@ -141,6 +147,20 @@ void autoDelegateTask() {
 	default: lcdPrint(uart1, 2, "Task Failed"); //fail msg
 			 break;
 	}
+	*/
+	case 1:
+		//autoTurnToHeading(90);
+		//autoTask1();
+		break;
+	case 2:
+		break;
+	case 3:
+		break;
+	default:
+		lcdPrint(uart1, 2, "Task Failed"); //fail msg
+		break;
+	}
+
 
 }
 
@@ -178,8 +198,10 @@ void autoMoveFwd() {
 	// x_input and y_input are being set directly here (since the autoProcessMotors code came
 	// from opcontrol.c) instead of taking their values from the joystick.
 
-	x_input = 0;
-	y_input = 110;
+	K_setMotor(PORT_MOTOR_FRONT_LEFT,127);
+	K_setMotor(PORT_MOTOR_FRONT_RIGHT,127);
+	K_setMotor(PORT_MOTOR_BACK_LEFT,127);
+	K_setMotor(PORT_MOTOR_BACK_LEFT,127);
 
 
 }
@@ -192,6 +214,64 @@ void autoMoveBack() {
 	y_input = -110;
 
 
+}
+
+void autoTurnToHeading(float desiredHeading) {
+	/*// OLD
+	float startGyroVal = gyroVal;
+
+	if(!(gyroVal == startGyroVal + 90)) {
+		angle_input = -127;
+	} else {
+		angle_input = 0;
+	}
+	*/
+
+	float currentDesiredChange = findDesiredChangeInDegrees(desiredHeading);
+
+	if((currentDesiredChange > 5)) { // within 5 degrees is "good enough"
+		angle_input = -127; // turn left
+	} else if((currentDesiredChange < -5)) {
+		angle_input = 127; // turn right
+	} else {
+		angle_input = 0; // stop
+	}
+
+	lcdPrint(uart1,1,"Heading: %f3.2", desiredHeading);
+	lcdPrint(uart1,2,"GryoVal: %d", gyroVal);
+}
+
+float convertRawGyroValToDegrees() {
+	float currentGyroVal = gyroVal; // get current gyro val
+
+	if (currentGyroVal > 0) {
+		while(currentGyroVal >= 360) {
+				currentGyroVal -= 360.0;
+			}
+	} else {
+		while(currentGyroVal < 0) {
+				currentGyroVal += 360.0;
+			}
+	}
+
+	return currentGyroVal;
+}
+
+float findDesiredChangeInDegrees(float desiredHeading) {
+	float currentGyroDegrees = convertRawGyroValToDegrees();
+	float desiredChange = desiredHeading - currentGyroDegrees;
+
+	if(desiredChange > 180) {
+		while(desiredChange > 180) {
+			desiredChange -= 180.0;
+		}
+	} else if(desiredChange < -180) {
+		while(desiredChange <= -180) {
+			desiredChange += 180.0;
+		}
+	}
+
+	return desiredChange;
 }
 
 void autoStop() {
@@ -213,9 +293,19 @@ void autoStop() {
 //the autoloop
 void autoTask1() {
 	autoMoveFwd();
+	delay(1010);
 
-	if ((LPos() - lastPosition) > 2000) {currentAutoTask++;}
-	lcdPrint(uart1,1,"%3.2f", (LPos()));
+
+//	intake_lift_direction = 1;
+//	delay(250);
+//	intake_lift_direction = 0;
+//
+//	launch_direction = 1;
+//	delay(250);
+//	launch_direction = 0;
+
+//	if ((LPos() - lastPosition) > 2000) {currentAutoTask++;}
+//	lcdPrint(uart1,1,"%3.2f", (LPos()));
 }
 
 void autoTask2() {
